@@ -174,7 +174,7 @@ int taskmanager_get_history_app_info(void *data)
 		}
 		ret = ail_package_get_appinfo(rec_result.pkg_name, &handle);
 		if (ret != AIL_ERROR_OK) {
-			printf("Failed to get appinfo\n");
+			_D("Failed to get appinfo(%d)\n", ret);
 			continue;
 		}
 

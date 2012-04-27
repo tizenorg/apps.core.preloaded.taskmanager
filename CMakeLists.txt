@@ -7,9 +7,7 @@ SET(SRCS
 	src/_genlist.c
 	src/_logic.c
 	src/_cpu.c
-#	src/_mem.c
 	src/_eina.c
-#	src/_info.c
 	src/_progressbar.c
 )
 

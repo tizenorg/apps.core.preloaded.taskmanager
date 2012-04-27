@@ -711,14 +711,17 @@ _D("func\n");
 void _set_genlist(struct appdata *ad)
 {
 _D("func\n");
+	int ret;
 	retm_if(ad == NULL, "Invalid argument: appdata is NULL\n");
 
 	_init_grp_cnt();
 
 	aul_app_get_running_app_info(runapp_info_get, ad);
 	taskmanager_get_history_app_info(ad);
-	_set_genlist_from_eina(ad);
-
+	ret = _set_genlist_from_eina(ad);
+	if (ret < 0) {
+		elm_exit();
+	}
 }
 
 void _init_pthread(void)

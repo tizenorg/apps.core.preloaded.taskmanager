@@ -154,6 +154,7 @@ int _app_create(struct appdata *ad)
 
 	nv = _add_naviframe(ly);
 	retvm_if(nv == NULL, -1, "Failed to add naviframe\n");
+	evas_object_show(nv);
 	ad->nv = nv;
 
 	ly = _add_layout(ad->nv, EDJ_NAME, GRP_TM);
@@ -171,6 +172,7 @@ int _app_create(struct appdata *ad)
 	evas_object_smart_callback_add(gl, "scroll,anim,start", _anim_start_cb, ad);
 	evas_object_smart_callback_add(gl, "scroll,anim,stop", _anim_stop_cb, ad);
 //	evas_object_smart_callback_add(gl, "edge,bottom", _moved_cb, ad);
+	evas_object_show(gl);
 	ad->gl = gl;
 
 	bt = elm_button_add(nv);

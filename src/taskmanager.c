@@ -215,9 +215,7 @@ static int app_terminate(void *data)
 {
 _D("func\n");
 	struct appdata *ad = data;
-//	sleep(1);
-//	ecore_timer_add(0.2, _exit_cb, NULL);
-
+	evas_object_del(ad->win);
 	return 0;
 }
 
