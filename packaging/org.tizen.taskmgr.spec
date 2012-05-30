@@ -5,6 +5,7 @@ Release:    1
 Group:      devel
 License:    Samsung Proprietary License
 Source0:    %{name}-%{version}.tar.gz
+Source1001: packaging/org.tizen.taskmgr.manifest 
 BuildRequires:  pkgconfig(appcore-efl)
 BuildRequires:  pkgconfig(elementary)
 BuildRequires:  pkgconfig(aul)
@@ -26,6 +27,7 @@ Task Manager.
 %setup -q
 
 %build
+cp %{SOURCE1001} .
 %define PREFIX    "/opt/apps/org.tizen.taskmgr"
 %define RESDIR    "/opt/apps/org.tizen.taskmgr/res"
 %define DATADIR    "/opt/apps/org.tizen.taskmgr/data"
@@ -38,6 +40,7 @@ make %{?jobs:-j%jobs}
 %make_install
 
 %files
+%manifest org.tizen.taskmgr.manifest
 /opt/apps/org.tizen.taskmgr/bin/*
 /opt/apps/org.tizen.taskmgr/res/*
 /opt/share/applications/*
