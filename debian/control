@@ -3,7 +3,7 @@ Section: devel
 Priority: extra
 Maintainer: Jeesun Kim <iamjs.kim@samsung.com>
 Uploaders: Noha Park <noha.park@samsung.com>
-Build-Depends: debhelper (>= 5), libappcore-efl-dev, libelm-dev, libaul-1-dev, libslp-utilx-dev, librua-dev, libslp-sysman-dev, libui-idlecapture-dev, libail-0-dev, dlog-dev
+Build-Depends: debhelper (>= 5), libappcore-efl-dev, libelm-dev, libaul-1-dev, libslp-utilx-dev, librua-dev, libslp-sysman-dev, libail-0-dev, dlog-dev
 Standards-Version: 3.7.2
 
 Package: org.tizen.taskmgr
