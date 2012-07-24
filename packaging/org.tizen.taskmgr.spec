@@ -3,7 +3,7 @@ Summary:    Task Manager
 Version:    0.14.1
 Release:    1
 Group:      devel
-License:    Samsung Proprietary License
+License:    Flora Software License
 Source0:    %{name}-%{version}.tar.gz
 Source1001: packaging/org.tizen.taskmgr.manifest 
 BuildRequires:  pkgconfig(appcore-efl)
