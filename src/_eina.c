@@ -74,11 +74,13 @@ int runapp_info_get(const aul_app_info *ainfo, void *data)
 
 	retvm_if(ainfo->pkg_name == NULL, 0, "Invalid pkg_name(%s)\n", ainfo->pkg_name);
 
-//	_D("running app is (%s)\n", ainfo->pkg_name);
-	ret = ail_package_get_appinfo(ainfo->pkg_name, &handle);
+	_D("running app is pkg:(%s), exec path:(%s)\n", ainfo->pkg_name,ainfo->app_path);
+
+//	ret = ail_package_get_appinfo(ainfo->pkg_name, &handle);
+	ret = ail_package_get_displayappinfobyexec(ainfo->app_path, &handle);  
+
 	retvm_if(ret != AIL_ERROR_OK, -1,
 			"Failed to get appinfo, pkg_name:%s\n", ainfo->pkg_name);
-
 	ret = ail_appinfo_get_bool(handle, AIL_PROP_X_SLP_TASKMANAGE_BOOL, &valb);
 	if (valb == 0) {
 		goto exit;
@@ -96,7 +98,6 @@ int runapp_info_get(const aul_app_info *ainfo, void *data)
 		valc = "Unknown";
 	}
 	info->app_name = strdup(valc);
-
 	ret = ail_appinfo_get_str(handle, AIL_PROP_ICON_STR, &valc);
 	if (valc == NULL || (ecore_file_exists(valc) == EINA_FALSE)) {
 		_D("%s: Failed to get ail icon\n", ainfo->pkg_name);
