@@ -176,13 +176,18 @@ static void end_inuse_cb(void *data, Evas_Object *obj, void *event_info)
 	char buf[_BUF_MAX] = { 0, };
 
 	ad->mode = MODE_END_INUSE;
+	/*
 	snprintf(buf, _BUF_MAX, T_("IDS_TASKMGR_POP_CLOSE_PS_APP_Q_THIS_MAY_CAUSE_DATA_TO_BE_LOST"), info_ev->app_name);
 	if (ad->popup_ask) {
 		evas_object_del(ad->popup_ask);
 		ad->popup_ask = NULL;
 	}
 	ad->popup_ask = _add_popup_ask(ad->win, buf, ad);
+	*/
 	g_egi = (void *)info_ev->it;
+	_del_popup_timer(ad);
+	_show_progressbar(ad);
+	response_end_inuse(ad);
 }
 
 static void delete_history_cb(void *data, Evas_Object *obj, void *event_info)
@@ -194,14 +199,17 @@ static void delete_history_cb(void *data, Evas_Object *obj, void *event_info)
 	char buf[_BUF_MAX] = { 0, };
 
 	ad->mode = MODE_DEL_HISTORY;
-
+	/*
 	snprintf(buf, _BUF_MAX, T_("IDS_TASKMGR_POP_CLEAR_PS_HISTORY_Q"), info_ev->app_name);
 	if (ad->popup_ask) {
 		evas_object_del(ad->popup_ask);
 		ad->popup_ask = NULL;
 	}
 	ad->popup_ask = _add_popup_ask(ad->win, buf, ad);
+	*/
 	g_egi = (void *)info_ev->it;
+	_del_popup_timer(ad);
+	response_del_history(ad);
 }
 
 static void nl_sel(void *data, Evas_Object *obj, void *event_info)
