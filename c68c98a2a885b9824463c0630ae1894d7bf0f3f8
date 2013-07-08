@@ -1,0 +1,8 @@
+Change-Id: Ic68c98a2a885b9824463c0630ae1894d7bf0f3f8
+Code-Review+2: Ryan Ware <ware@linux.intel.com>
+Verified+1: Ryan Ware <ware@linux.intel.com>
+Submitted-by: Ryan Ware <ware@linux.intel.com>
+Submitted-at: Mon, 08 Jul 2013 10:08:05 -0700
+Reviewed-on: https://review.tizen.org/gerrit/4438
+Project: apps/core/preloaded/taskmanager
+Branch: refs/heads/tizen
