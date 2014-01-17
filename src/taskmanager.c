@@ -22,8 +22,6 @@
 #include <unistd.h>
 #include <appcore-efl.h>
 #include <Elementary.h>
-#include <Ecore_X.h>
-#include <utilX.h>
 #include <vconf.h>
 #include <aul.h>
 #include <sysman.h>
@@ -125,19 +123,13 @@ Eina_Bool _exit_cb(void *data)
 void _key_grab(struct appdata *ad)
 {
 	int ret = 0;
-	Ecore_X_Window xwin;	/* key grab */
-	Ecore_X_Display *disp;	/* key grab */
-
-	/* Key Grab */
-	disp = ecore_x_display_get();
-	xwin = elm_win_xwindow_get(ad->win);
-
-	ret = utilx_grab_key(disp, xwin, KEY_SELECT, SHARED_GRAB);
+	ret = efl_util_grab_key(ad->win, KEY_SELECT, SHARED_GRAB);
 	retm_if(ret < 0, "Failed to grab home key\n");
 }
 
 int _set_launch_effect(Evas_Object *win)
 {
+	Ecore_Evas *ee = NULL;
 	Ecore_X_Window xwin = 0;
 	static Ecore_X_Atom ATOM_WM_WINDOW_ROLE = 0;
 	static Ecore_X_Atom ATOM_NET_WM_NAME = 0;
@@ -159,30 +151,24 @@ int _set_launch_effect(Evas_Object *win)
 
 	xwin = elm_win_xwindow_get(win);
 	ecore_x_window_prop_string_set(xwin, ATOM_WM_WINDOW_ROLE,
-				       "TASK_MANAGER");
+								   "TASK_MANAGER");
 	ecore_x_window_prop_string_set(xwin, ATOM_NET_WM_NAME, "TASK_MANAGER");
 
-	ecore_x_icccm_name_class_set(xwin, "TASK_MANAGER", "TASK_MANAGER");
+	ee = ecore_evas_object_ecore_evas_get(win);
+	ecore_evas_name_class_set(ee, "TASK_MANAGER", "TASK_MANAGER");
 	return 0;
 }
 
 int _unset_notification_level(Evas_Object *win)
 {
-	Ecore_X_Window xwin;
-
-	xwin = elm_win_xwindow_get(win);
-	ecore_x_netwm_window_type_set(xwin, ECORE_X_WINDOW_TYPE_NORMAL);
+	efl_util_netwm_window_type_set(win, EFL_UTIL_WINDOW_TYPE_NORMAL);
 	return 0;
 }
 
 
-int _set_notification_level(Evas_Object *win, Utilx_Notification_Level level)
+int _set_notification_level(Evas_Object *win, Efl_Util_Notification_Level level)
 {
-	Ecore_X_Window xwin = 0;
-
-	xwin = elm_win_xwindow_get(win);
-	ecore_x_netwm_window_type_set(xwin, ECORE_X_WINDOW_TYPE_NOTIFICATION);
-	utilx_set_system_notification_level(ecore_x_display_get(), xwin, level);
+	efl_util_set_system_notification_level(win, level);
 	return 0;
 }
 

@@ -102,9 +102,6 @@ int _app_create(struct appdata *ad)
 {
 	Evas_Object *ly, *bg, *nv, *bt, *gl;
 	Evas_Object *conform = NULL;
-	int w, h;
-
-	ecore_x_window_size_get(ecore_x_window_root_first_get(), &w, &h);
 
 	retvm_if(ad == NULL, -1, "Invalid argument: appdata is NULL\n");
 	ad->ending = EINA_FALSE;
@@ -118,7 +115,6 @@ int _app_create(struct appdata *ad)
 	ly = _add_layout_main(conform, EINA_TRUE, EINA_FALSE);
 	retvm_if(ly == NULL, -1, "Failed to add layout main\n");
 	elm_object_content_set(conform, ly);
-	evas_object_resize(ly, w, h);
 
 	bg = _add_bg(ad->win, "group_list");
 	retvm_if(bg == NULL, -1, "Failed to add bg\n");
@@ -153,12 +149,7 @@ int _app_create(struct appdata *ad)
 }
 static void _get_win_geometry(struct appdata *ad)
 {
-	Ecore_X_Window focus_win;
-	Ecore_X_Window root_win;
-
-	focus_win = ecore_x_window_focus_get();
-	root_win = ecore_x_window_root_get(focus_win);
-	ecore_x_window_size_get(root_win, &ad->root_w, &ad->root_h);
+	elm_win_screen_size_get(ad->win, NULL, NULL, &ad->root_w, &ad->root_h);
 }
 
 /* this func is to exit taskmanager after launching application */

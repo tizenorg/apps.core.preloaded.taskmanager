@@ -45,6 +45,7 @@ pkg_check_modules(pkgs REQUIRED
 	appcore-efl
 	elementary
 	aul
+	capi-ui-efl-util
 	utilX
 	rua
 	vconf
