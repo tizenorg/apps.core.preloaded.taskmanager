@@ -45,7 +45,7 @@ pkg_check_modules(pkgs REQUIRED
 	appcore-efl
 	elementary
 	aul
-	utilX
+	capi-ui-efl-util
 	rua
 	vconf
 	sysman
@@ -56,6 +56,16 @@ pkg_check_modules(pkgs REQUIRED
 FOREACH(flag ${pkgs_CFLAGS})
 	SET(EXTRA_CFLAGS "${EXTRA_CFLAGS} ${flag}")
 ENDFOREACH(flag)
+
+pkg_check_modules(ECORE_X ecore-x)
+
+FOREACH(flag ${ECORE_X_CFLAGS})
+	SET(EXTRA_CFLAGS "${EXTRA_CFLAGS} ${flag}")
+ENDFOREACH(flag)
+
+IF (ECORE_X_FOUND)
+	SET(CFLAGS "${CFLAGS} -DHAVE_ECORE_X")
+ENDIF (ECORE_X_FOUND)
 
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${EXTRA_CFLAGS} -fPIC")
 SET(CMAKE_C_FLAGS_DEBUG "-O0 -g")

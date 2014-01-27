@@ -9,7 +9,7 @@ Source1001: 	org.tizen.taskmgr.manifest
 BuildRequires:  pkgconfig(appcore-efl)
 BuildRequires:  pkgconfig(elementary)
 BuildRequires:  pkgconfig(aul)
-BuildRequires:  pkgconfig(utilX)
+BuildRequires:  pkgconfig(capi-ui-efl-util)
 BuildRequires:  pkgconfig(rua)
 BuildRequires:  pkgconfig(sysman)
 BuildRequires:  pkgconfig(ail)

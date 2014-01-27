@@ -21,7 +21,11 @@
 #include <appcore-common.h>
 #include <ail.h>
 #include <aul.h>
+
+#ifdef HAVE_ECORE_X
 #include <Ecore_X.h>
+#endif
+
 #include <vconf.h>
 
 #include "taskmanager.h"
@@ -153,6 +157,7 @@ static void _get_win_geometry(struct appdata *ad)
 }
 
 /* this func is to exit taskmanager after launching application */
+#ifdef HAVE_ECORE_X
 static Eina_Bool __climsg_cb(void *data, int type, void *event)
 {
 _D("%s\n", __func__);
@@ -187,6 +192,7 @@ _D("%s\n", __func__);
 
 	return ECORE_CALLBACK_CANCEL;
 }
+#endif
 
 static int runapp_count = 0;
 
@@ -374,7 +380,10 @@ Eina_Bool _create_idler_cb(void *data)
 	_key_grab(ad);
 
 	_get_win_geometry(ad);
+
+#ifdef HAVE_ECORE_X
 	ecore_event_handler_add(ECORE_X_EVENT_CLIENT_MESSAGE, __climsg_cb, ad);
+#endif
 
 	return ECORE_CALLBACK_CANCEL;
 }

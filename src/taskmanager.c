@@ -16,14 +16,17 @@
  */
 
 
-
+#include <efl_util.h>
 
 #include <stdio.h>
 #include <unistd.h>
 #include <appcore-efl.h>
 #include <Elementary.h>
+
+#ifdef HAVE_ECORE_X
 #include <Ecore_X.h>
-#include <utilX.h>
+#endif
+
 #include <vconf.h>
 #include <aul.h>
 #include <sysman.h>
@@ -125,65 +128,65 @@ Eina_Bool _exit_cb(void *data)
 void _key_grab(struct appdata *ad)
 {
 	int ret = 0;
-	Ecore_X_Window xwin;	/* key grab */
-	Ecore_X_Display *disp;	/* key grab */
-
-	/* Key Grab */
-	disp = ecore_x_display_get();
-	xwin = elm_win_xwindow_get(ad->win);
-
-	ret = utilx_grab_key(disp, xwin, KEY_SELECT, SHARED_GRAB);
+	ret = efl_util_grab_key(ad->win, KEY_SELECT, SHARED_GRAB);
 	retm_if(ret < 0, "Failed to grab home key\n");
 }
 
 int _set_launch_effect(Evas_Object *win)
 {
+#ifdef HAVE_ECORE_X
 	Ecore_X_Window xwin = 0;
 	static Ecore_X_Atom ATOM_WM_WINDOW_ROLE = 0;
 	static Ecore_X_Atom ATOM_NET_WM_NAME = 0;
-	retvm_if(win == NULL, -1, "[Error] Invalid argument: win is NULL\n");
-
-	ATOM_WM_WINDOW_ROLE = ecore_x_atom_get("WM_WINDOW_ROLE");
-	if (!ATOM_WM_WINDOW_ROLE) {
-		fprintf(stderr,
-			"[App] %s(%d) XInternAtom(WM_WINDOW_ROLE) failed.\n",
-			__func__, __LINE__);
-	}
-
-	ATOM_NET_WM_NAME = ecore_x_atom_get("_NET_WM_NAME");
-	if (!ATOM_NET_WM_NAME) {
-		fprintf(stderr,
-			"[App] %s(%d) XInternAtom(ATOM_NET_WM_NAME) failed.\n",
-			__func__, __LINE__);
-	}
 
 	xwin = elm_win_xwindow_get(win);
-	ecore_x_window_prop_string_set(xwin, ATOM_WM_WINDOW_ROLE,
-				       "TASK_MANAGER");
-	ecore_x_window_prop_string_set(xwin, ATOM_NET_WM_NAME, "TASK_MANAGER");
+	if (xwin) {
+		retvm_if(win == NULL, -1, "[Error] Invalid argument: win is NULL\n");
 
-	ecore_x_icccm_name_class_set(xwin, "TASK_MANAGER", "TASK_MANAGER");
+		ATOM_WM_WINDOW_ROLE = ecore_x_atom_get("WM_WINDOW_ROLE");
+		if (!ATOM_WM_WINDOW_ROLE) {
+			fprintf(stderr,
+				"[App] %s(%d) XInternAtom(WM_WINDOW_ROLE) failed.\n",
+				__func__, __LINE__);
+		}
+
+		ATOM_NET_WM_NAME = ecore_x_atom_get("_NET_WM_NAME");
+		if (!ATOM_NET_WM_NAME) {
+			fprintf(stderr,
+				"[App] %s(%d) XInternAtom(ATOM_NET_WM_NAME) failed.\n",
+				__func__, __LINE__);
+		}
+
+		ecore_x_window_prop_string_set(xwin, ATOM_WM_WINDOW_ROLE,
+					       "TASK_MANAGER");
+		ecore_x_window_prop_string_set(xwin, ATOM_NET_WM_NAME, "TASK_MANAGER");
+
+		ecore_x_icccm_name_class_set(xwin, "TASK_MANAGER", "TASK_MANAGER");
+		return 0;
+	}
+#endif
+
+#ifdef HAVE_WAYLAND
+	Ecore_Wl_Window *wl_win;
+	wl_win = elm_win_wl_window_get(win);
+	if (wl_win) {
+		printf("wayland support not implemented yet.\n");
+	}
+#endif
+
 	return 0;
+
 }
 
 int _unset_notification_level(Evas_Object *win)
 {
-	Ecore_X_Window xwin;
-
-	xwin = elm_win_xwindow_get(win);
-	ecore_x_netwm_window_type_set(xwin, ECORE_X_WINDOW_TYPE_NORMAL);
-	return 0;
+	efl_util_netwm_window_type_set(win, EFL_UTIL_WINDOW_TYPE_NORMAL);
 }
 
-
-int _set_notification_level(Evas_Object *win, Utilx_Notification_Level level)
+static void _set_notification_level(Evas_Object *win, Efl_Util_Notification_Level level)
 {
-	Ecore_X_Window xwin = 0;
-
-	xwin = elm_win_xwindow_get(win);
-	ecore_x_netwm_window_type_set(xwin, ECORE_X_WINDOW_TYPE_NOTIFICATION);
-	utilx_set_system_notification_level(ecore_x_display_get(), xwin, level);
-	return 0;
+	efl_util_netwm_window_type_set(win, EFL_UTIL_WINDOW_TYPE_NOTIFICATION);
+	efl_util_set_system_notification_level(win, level);
 }
 
 void _check_show_state(void)
@@ -209,7 +212,7 @@ int app_create(void *data)
 	ad->win = win;
 
 	_set_launch_effect(win);
-//	_set_notification_level(win, UTILX_NOTIFICATION_LEVEL_NORMAL);
+	_set_notification_level(win, EFL_UTIL_NOTIFICATION_LEVEL_NORMAL);
 
 	/* init internationalization */
 	r = appcore_set_i18n(PACKAGE, LOCALEDIR);

@@ -22,8 +22,6 @@
 #define __TASKMANAGER_H__
 
 #include <Elementary.h>
-#include <Ecore_X.h>
-#include <utilX.h>
 #include <bundle.h>
 
 #if !defined(PACKAGE)
@@ -124,7 +122,6 @@ enum task_status {
 
 Evas_Object *load_edj(Evas_Object *parent, const char *file, const char *group);
 int _unset_notification_level(Evas_Object *win);
-int _set_notification_level(Evas_Object *win, Utilx_Notification_Level level);
 void _key_grab(struct appdata *ad);
 Eina_Bool _exit_cb(void *data);
 void _check_show_state(void);

@@ -15,9 +15,6 @@
  * limitations under the License.
  */
 
-
-
-
 #include <appcore-efl.h>
 
 #include "taskmanager.h"
@@ -28,15 +25,11 @@
 Evas_Object *_add_window(const char *name)
 {
 	Evas_Object *eo;
-	int w, h;
 
 	eo = elm_win_add(NULL, name, ELM_WIN_BASIC);
 	if (eo) {
 		elm_win_title_set(eo, name);
 		elm_win_borderless_set(eo, EINA_TRUE);
-		ecore_x_window_size_get(ecore_x_window_root_first_get(),
-					&w, &h);
-		evas_object_resize(eo, w, h);
 	}
 
 	return eo;
