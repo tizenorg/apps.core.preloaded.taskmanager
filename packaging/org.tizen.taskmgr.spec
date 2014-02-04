@@ -1,11 +1,11 @@
 Name:       org.tizen.taskmgr
 Summary:    Task Manager
-Version: 0.14.5
+Version:    0.14.5
 Release:    1
-Group:      devel
-License:    Flora Software License
+Group:      System/Monitoring
+License:    Flora
 Source0:    %{name}-%{version}.tar.gz
-Source1001: 	org.tizen.taskmgr.manifest
+Source1001: org.tizen.taskmgr.manifest
 BuildRequires:  pkgconfig(appcore-efl)
 BuildRequires:  pkgconfig(elementary)
 BuildRequires:  pkgconfig(aul)
@@ -13,11 +13,12 @@ BuildRequires:  pkgconfig(utilX)
 BuildRequires:  pkgconfig(rua)
 BuildRequires:  pkgconfig(sysman)
 BuildRequires:  pkgconfig(ail)
-
+BuildRequires:  pkgconfig(libtzplatform-config)
 BuildRequires:  cmake
 BuildRequires:  edje-bin
 BuildRequires:  embryo-bin
 BuildRequires:  gettext-devel
+Requires:       tizen-platform-config-tools
 
 %description
 Task Manager.
@@ -27,11 +28,9 @@ Task Manager.
 cp %{SOURCE1001} .
 
 %build
-%define PREFIX    "/usr/apps/org.tizen.taskmgr"
-%define RESDIR    "/usr/apps/org.tizen.taskmgr/res"
-%define DATADIR    "/opt/usr/apps/org.tizen.taskmgr/data"
+%define PREFIX %{TZ_SYS_RO_APP}"/org.tizen.taskmgr"
 
-cmake . -DCMAKE_INSTALL_PREFIX=%{PREFIX}
+cmake . -DCMAKE_INSTALL_PREFIX=%{PREFIX} -DCMAKE_SYS_CONF_DIR=%{TZ_SYS_ETC}
 
 make %{?jobs:-j%jobs}
 
@@ -42,10 +41,9 @@ rm -rf %{buildroot}
 %files
 %manifest %{name}.manifest
 %defattr(-,root,root,-)
-/usr/apps/org.tizen.taskmgr/bin/*
-/usr/apps/org.tizen.taskmgr/res/*
+%{TZ_SYS_RO_APP}/org.tizen.taskmgr/bin/*
+%{TZ_SYS_RO_APP}/org.tizen.taskmgr/res/*
 %attr(-,inhouse,inhouse)
-/opt/usr/apps/org.tizen.taskmgr/data
 /usr/share/packages/*
 /usr/share/icons/default/small/org.tizen.taskmgr.png
-/opt/etc/smack/accesses.d/org.tizen.taskmgr.rule
+%{TZ_SYS_ETC}/smack/accesses.d/org.tizen.taskmgr.rule
