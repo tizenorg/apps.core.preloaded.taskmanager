@@ -26,32 +26,35 @@
 #include <utilX.h>
 #include <bundle.h>
 
+/* For multi-user support */
+#include <tzplatform_config.h>
+
 #if !defined(PACKAGE)
 #define PACKAGE "taskmanager"
 #endif
 
 #ifndef PREFIX
-#define PREFIX "/usr/apps/org.tizen."PACKAGE
+#define PREFIX "org.tizen."PACKAGE
 #endif
 
 #if !defined(RESDIR)
-#	define RESDIR PREFIX"/res"
+#	define RESDIR tzplatform_mkpath3(TZ_SYS_RO_APP, PREFIX, "res")
 #endif
 
 #if !defined(LOCALEDIR)
-#define LOCALEDIR RESDIR"/locale"
+#define LOCALEDIR tzplatform_mkpath3(TZ_SYS_RO_APP, RESDIR, "locale")
 #endif
 
 #if !defined(EDJDIR)
-#define EDJDIR RESDIR"/edje"PACKAGE
+#define EDJDIR tzplatform_mkpath3(TZ_SYS_RO_APP, RESDIR, "edje"PACKAGE)
 #endif
 
 #if !defined(IMAGEDIR)
-#	define IMAGEDIR RESDIR"/images/"PACKAGE
+#	define IMAGEDIR tzplatform_mkpath3(TZ_SYS_RO_APP, RESDIR, "images/"PACKAGE)
 #endif
 
-#define EDJ_NAME EDJDIR"/taskmgr.edj"
-#define EDJ_THEME EDJDIR"/theme_taskmanager.edj"
+#define EDJ_NAME tzplatform_mkpath3(TZ_SYS_RO_APP, EDJDIR, "taskmgr.edj")
+#define EDJ_THEME tzplatform_mkpath3(TZ_SYS_RO_APP, EDJDIR, "theme_taskmanager.edj")
 #define GRP_TM "task_manager"
 
 #define S_(str) dgettext("sys_string", str)
