@@ -36,6 +36,14 @@ MESSAGE("Build type: ${CMAKE_BUILD_TYPE}")
 
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR})
 
+IF(X11_SUPPORT)
+	ADD_DEFINITIONS("-DUSE_X11")
+ENDIF(X11_SUPPORT)
+IF(WAYLAND_SUPPORT)
+	ADD_DEFINITIONS("-DUSE_WAYLAND")
+ENDIF(WAYLAND_SUPPORT)
+
+IF(X11_SUPPORT)
 INCLUDE(FindPkgConfig)
 pkg_check_modules(pkgs REQUIRED
 	ecore
@@ -56,6 +64,27 @@ pkg_check_modules(pkgs REQUIRED
 	dlog
 	libtzplatform-config
 )
+ELSEIF(WAYLAND_SUPPORT)
+INCLUDE(FindPkgConfig)
+pkg_check_modules(pkgs REQUIRED
+	ecore
+	ecore-file
+	ecore-input
+	ecore-wayland
+	edje
+	eina
+	evas
+	appcore-efl
+	elementary
+	aul
+	rua
+	vconf
+	sysman
+	ail
+	dlog
+	libtzplatform-config
+)
+ENDIF(X11_SUPPORT)
 
 FOREACH(flag ${pkgs_CFLAGS})
 	SET(EXTRA_CFLAGS "${EXTRA_CFLAGS} ${flag}")

@@ -22,8 +22,9 @@
 #define __TASKMANAGER_H__
 
 #include <Elementary.h>
-#include <Ecore_X.h>
+#ifdef USE_X11
 #include <utilX.h>
+#endif
 #include <bundle.h>
 
 /* For multi-user support */
@@ -127,7 +128,12 @@ enum task_status {
 
 Evas_Object *load_edj(Evas_Object *parent, const char *file, const char *group);
 int _unset_notification_level(Evas_Object *win);
+#ifdef USE_X11
 int _set_notification_level(Evas_Object *win, Utilx_Notification_Level level);
+#endif
+#ifdef USE_WAYLAND // TO DO WAYLAND
+	// No notification system available for Wayland yet
+#endif
 void _key_grab(struct appdata *ad);
 Eina_Bool _exit_cb(void *data);
 void _check_show_state(void);

@@ -1,3 +1,6 @@
+%bcond_with wayland
+%bcond_with x
+
 Name:       org.tizen.taskmgr
 Summary:    Task Manager
 Version:    0.14.5
@@ -9,7 +12,13 @@ Source1001: org.tizen.taskmgr.manifest
 BuildRequires:  pkgconfig(appcore-efl)
 BuildRequires:  pkgconfig(elementary)
 BuildRequires:  pkgconfig(aul)
+%if %{with x}
 BuildRequires:  pkgconfig(utilX)
+BuildRequires:  pkgconfig(ecore-x)
+%endif
+%if %{with wayland}
+BuildRequires:  pkgconfig(ecore-wayland)
+%endif
 BuildRequires:  pkgconfig(rua)
 BuildRequires:  pkgconfig(sysman)
 BuildRequires:  pkgconfig(ail)
@@ -54,6 +63,6 @@ rm -rf %{buildroot}
 %{TZ_SYS_RO_APP}/org.tizen.taskmgr/bin/*
 %{TZ_SYS_RO_APP}/org.tizen.taskmgr/res/*
 %attr(-,inhouse,inhouse)
-/usr/share/packages/*
-/usr/share/icons/default/small/org.tizen.taskmgr.png
+%{_datarootdir}/packages/*
+%{_datarootdir}/icons/default/small/org.tizen.taskmgr.png
 %{TZ_SYS_ETC}/smack/accesses.d/org.tizen.taskmgr.rule
