@@ -20,6 +20,10 @@
 
 #include <appcore-efl.h>
 
+#ifdef USE_X11
+#include <Ecore_X.h>
+#endif
+
 #include "taskmanager.h"
 #include "_util_log.h"
 #include "_util_efl.h"
@@ -34,8 +38,13 @@ Evas_Object *_add_window(const char *name)
 	if (eo) {
 		elm_win_title_set(eo, name);
 		elm_win_borderless_set(eo, EINA_TRUE);
+#ifdef USE_X11
 		ecore_x_window_size_get(ecore_x_window_root_first_get(),
 					&w, &h);
+#endif
+#ifdef USE_WAYLAND
+		ecore_wl_screen_size_get(&w, &h);
+#endif
 		evas_object_resize(eo, w, h);
 	}
 
@@ -286,5 +295,3 @@ Evas_Object *_add_progressbar(Evas_Object *parent, const char *style,
 
 	return pb;
 }
-
-

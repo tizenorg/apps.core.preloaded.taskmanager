@@ -22,8 +22,13 @@
 #include <unistd.h>
 #include <appcore-efl.h>
 #include <Elementary.h>
+#ifdef USE_X11
 #include <Ecore_X.h>
 #include <utilX.h>
+#endif
+#ifdef USE_WAYLAND
+#include <Ecore_Wayland.h>
+#endif
 #include <vconf.h>
 #include <aul.h>
 #include <sysman.h>
@@ -125,6 +130,7 @@ Eina_Bool _exit_cb(void *data)
 void _key_grab(struct appdata *ad)
 {
 	int ret = 0;
+#ifdef USE_X11
 	Ecore_X_Window xwin;	/* key grab */
 	Ecore_X_Display *disp;	/* key grab */
 
@@ -133,15 +139,20 @@ void _key_grab(struct appdata *ad)
 	xwin = elm_win_xwindow_get(ad->win);
 
 	ret = utilx_grab_key(disp, xwin, KEY_SELECT, SHARED_GRAB);
+#endif
+#ifdef USE_WAYLAND // TO DO WAYLAND
+	// Wayland equivalent to utilx_grab_key() not available yet
+#endif
 	retm_if(ret < 0, "Failed to grab home key\n");
 }
 
 int _set_launch_effect(Evas_Object *win)
 {
+	retvm_if(win == NULL, -1, "[Error] Invalid argument: win is NULL\n");
+#ifdef USE_X11
 	Ecore_X_Window xwin = 0;
 	static Ecore_X_Atom ATOM_WM_WINDOW_ROLE = 0;
 	static Ecore_X_Atom ATOM_NET_WM_NAME = 0;
-	retvm_if(win == NULL, -1, "[Error] Invalid argument: win is NULL\n");
 
 	ATOM_WM_WINDOW_ROLE = ecore_x_atom_get("WM_WINDOW_ROLE");
 	if (!ATOM_WM_WINDOW_ROLE) {
@@ -163,19 +174,28 @@ int _set_launch_effect(Evas_Object *win)
 	ecore_x_window_prop_string_set(xwin, ATOM_NET_WM_NAME, "TASK_MANAGER");
 
 	ecore_x_icccm_name_class_set(xwin, "TASK_MANAGER", "TASK_MANAGER");
+#endif
+#ifdef USE_WAYLAND // TO DO WAYLAND
+	elm_win_role_set(win, "TASK_MANAGER");
+	elm_win_title_set(win, "TASK_MANAGER");
+#endif
 	return 0;
 }
 
 int _unset_notification_level(Evas_Object *win)
 {
+#ifdef USE_X11
 	Ecore_X_Window xwin;
 
 	xwin = elm_win_xwindow_get(win);
 	ecore_x_netwm_window_type_set(xwin, ECORE_X_WINDOW_TYPE_NORMAL);
+#endif
+#ifdef USE_WAYLAND // TO DO WAYLAND
+#endif
 	return 0;
 }
 
-
+#ifdef USE_X11
 int _set_notification_level(Evas_Object *win, Utilx_Notification_Level level)
 {
 	Ecore_X_Window xwin = 0;
@@ -183,8 +203,13 @@ int _set_notification_level(Evas_Object *win, Utilx_Notification_Level level)
 	xwin = elm_win_xwindow_get(win);
 	ecore_x_netwm_window_type_set(xwin, ECORE_X_WINDOW_TYPE_NOTIFICATION);
 	utilx_set_system_notification_level(ecore_x_display_get(), xwin, level);
+
 	return 0;
 }
+#endif
+#ifdef USE_WAYLAND // TO DO WAYLAND
+	// No system notification for wayland yet
+#endif
 
 void _check_show_state(void)
 {
@@ -209,7 +234,12 @@ int app_create(void *data)
 	ad->win = win;
 
 	_set_launch_effect(win);
-//	_set_notification_level(win, UTILX_NOTIFICATION_LEVEL_NORMAL);
+#ifdef USE_X11
+	_set_notification_level(win, UTILX_NOTIFICATION_LEVEL_NORMAL);
+#endif
+#ifdef USE_WAYLAND // TO DO WAYLAND
+	// No system notification for wayland yet
+#endif
 
 	/* init internationalization */
 	r = appcore_set_i18n(PACKAGE, LOCALEDIR);
