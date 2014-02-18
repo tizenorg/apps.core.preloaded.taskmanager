@@ -22,10 +22,8 @@
 #include <unistd.h>
 #include <appcore-efl.h>
 #include <vconf.h>
-#include <utilX.h>
 #include <aul.h>
 #include <rua.h>
-#include <Ecore_X.h>
 #include <Eina.h>
 #include <unistd.h>
 #include <time.h>
