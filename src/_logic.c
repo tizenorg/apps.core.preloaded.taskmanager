@@ -21,7 +21,13 @@
 #include <appcore-common.h>
 #include <ail.h>
 #include <aul.h>
+#ifdef USE_X11
 #include <Ecore_X.h>
+#endif
+#ifdef USE_WAYLAND
+#include <Ecore.h>
+#include <Ecore_Wayland.h>
+#endif
 #include <vconf.h>
 
 #include "taskmanager.h"
@@ -104,7 +110,12 @@ int _app_create(struct appdata *ad)
 	Evas_Object *conform = NULL;
 	int w, h;
 
+#ifdef USE_X11
 	ecore_x_window_size_get(ecore_x_window_root_first_get(), &w, &h);
+#endif
+#ifdef USE_WAYLAND
+	ecore_wl_screen_size_get(&w, &h);
+#endif
 
 	retvm_if(ad == NULL, -1, "Invalid argument: appdata is NULL\n");
 	ad->ending = EINA_FALSE;
@@ -153,22 +164,28 @@ int _app_create(struct appdata *ad)
 }
 static void _get_win_geometry(struct appdata *ad)
 {
+#ifdef USE_X11
 	Ecore_X_Window focus_win;
 	Ecore_X_Window root_win;
 
 	focus_win = ecore_x_window_focus_get();
 	root_win = ecore_x_window_root_get(focus_win);
 	ecore_x_window_size_get(root_win, &ad->root_w, &ad->root_h);
+#endif
+#ifdef USE_WAYLAND
+	ecore_wl_screen_size_get(&ad->root_w, &ad->root_h);
+#endif
 }
 
 /* this func is to exit taskmanager after launching application */
 static Eina_Bool __climsg_cb(void *data, int type, void *event)
 {
 _D("%s\n", __func__);
-	static Atom a_deact;
-	pid_t pid_a, pid_d;
 
+	pid_t pid_a, pid_d;
 	struct appdata *ad = (struct appdata *)data;
+#ifdef USE_X11
+	static Atom a_deact;
 	Ecore_X_Event_Client_Message *ev = event;
 
 	if(ev == NULL) {
@@ -179,6 +196,7 @@ _D("%s\n", __func__);
 
 	pid_a = ev->data.l[1];
 	pid_d = ev->data.l[3];
+
 	a_deact = ecore_x_atom_get("_X_ILLUME_DEACTIVATE_WINDOW");
 
 	/* when pid_a == pid_d, this is useless data */
@@ -193,7 +211,9 @@ _D("%s\n", __func__);
 		_D("messagre is act\n");
 
 	}
-
+#endif
+#ifdef USE_WAYLAND // TO DO WAYLAND
+#endif
 	return ECORE_CALLBACK_CANCEL;
 }
 
@@ -383,7 +403,11 @@ Eina_Bool _create_idler_cb(void *data)
 	_key_grab(ad);
 
 	_get_win_geometry(ad);
+#ifdef USE_X11
 	ecore_event_handler_add(ECORE_X_EVENT_CLIENT_MESSAGE, __climsg_cb, ad);
+#endif
+#ifdef USE_WAYLAND // TO DO WAYLAND
+#endif
 
 	return ECORE_CALLBACK_CANCEL;
 }
