@@ -282,7 +282,7 @@ static Eina_Bool _anim_slipped_item(void *data)
 	item_outer_h = (int)evas_object_data_get(item_outer, PRIVATE_DATA_KEY_ITEM_H);
 
 	item_outer_h -= SLIPPED_LENGTH;
-	evas_object_size_hint_min_set(item_outer, item_outer_w, item_outer_h);
+	evas_object_size_hint_min_set(item_outer, ELM_SCALE_SIZE(item_outer_w), ELM_SCALE_SIZE(item_outer_h));
 	evas_object_data_set(item_outer, PRIVATE_DATA_KEY_ITEM_H, (void *)item_outer_h);
 
 	if (item_outer_h <= 0) {
@@ -629,7 +629,7 @@ extern Evas_Object *item_create(Evas_Object *scroller, list_type_default_s *info
 	focus = elm_button_add(scroller);
 	goto_if(NULL == focus, ERROR);
 	elm_object_style_set(focus, "focus");
-	elm_object_part_content_set(item, "focus", focus);
+	elm_object_part_content_set(item_inner, "focus", focus);
 	evas_object_smart_callback_add(focus, "clicked", _clicked_cb, item);
 
 	evas_object_data_set(item, DATA_KEY_ITEM_INFO, info);
@@ -697,8 +697,8 @@ extern void item_terminate(Evas_Object *item)
 		util_kill_app(appid);
 	}
 
-	if (0 != rua_delete_history_with_pkgname(appid)) {		
-		_E("Cannot delete history for package(%s)", appid);		
+	if (0 != rua_delete_history_with_pkgname(appid)) {
+		_E("Cannot delete history for package(%s)", appid);
 	}
 }
 
