@@ -151,6 +151,7 @@ ERROR:
 
 
 
+#define DEFAULT_ICON IMAGEDIR"/default.png"
 int _get_pkginfo_cb(pkgmgrinfo_appinfo_h app_handle, void *user_data)
 {
 	char *appid = NULL;
@@ -184,7 +185,12 @@ int _get_pkginfo_cb(pkgmgrinfo_appinfo_h app_handle, void *user_data)
 		goto ERROR;
 	}
 	if (icon) {
-		pkg_info->icon= strdup(icon);
+		if (0 == access(icon, R_OK)) {
+			pkg_info->icon= strdup(icon);
+		} else {
+			_D("Fail to access icon path");
+			pkg_info->icon = strdup(DEFAULT_ICON);
+		}
 		goto_if(!pkg_info->icon, ERROR);
 	}
 
