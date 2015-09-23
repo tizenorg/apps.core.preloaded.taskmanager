@@ -151,6 +151,7 @@ ERROR:
 
 
 
+#define DEFAULT_ICON IMAGEDIR"/default.png"
 int _get_pkginfo_cb(pkgmgrinfo_appinfo_h app_handle, void *user_data)
 {
 	char *appid = NULL;
@@ -184,7 +185,11 @@ int _get_pkginfo_cb(pkgmgrinfo_appinfo_h app_handle, void *user_data)
 		goto ERROR;
 	}
 	if (icon) {
-		pkg_info->icon= strdup(icon);
+		if (!strcmp(icon, "(NULL)")) {
+			pkg_info->icon = strdup(DEFAULT_ICON);
+		} else {
+			pkg_info->icon= strdup(icon);
+		}
 		goto_if(!pkg_info->icon, ERROR);
 	}
 
