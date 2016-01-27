@@ -20,6 +20,7 @@
 #ifndef __TASK_MGR_LOG_H__
 #define __TASK_MGR_LOG_H__
 
+#define TIZEN_ENGINEER_MODE
 #include <unistd.h>
 #include <dlog.h>
 
