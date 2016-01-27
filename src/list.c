@@ -18,13 +18,18 @@
  */
 
 #include <Elementary.h>
-#include <pkgmgr-info.h>
-#include <rua.h>
+#include <package_manager.h>
+#include <app_manager.h>
+#include <context_history.h>
 
 #include "list.h"
 #include "log.h"
 #include "main.h"
 #include "util.h"
+#include "conf.h"
+
+#define GO_NEXT 1
+#define BREAK 0
 
 typedef struct pkginfo {
 	char *appid;
@@ -45,8 +50,6 @@ static struct {
 } private_table_s = {
 	.pkginfo_table = NULL,
 };
-
-
 
 static void _pkglist_unretrieve_item(list_type_default_s *default_info)
 {
@@ -81,177 +84,137 @@ static void _pkglist_unretrieve_item(list_type_default_s *default_info)
 }
 
 
-
-static list_type_default_s *_pkglist_retrieve_item(const char *appid, const char *arg, time_t launch_time)
+static task_mgr_error_e _get_app_launchtime(Eina_List *pkg_list)
 {
-	retv_if(!appid, NULL);
 
-	private_pkginfo_s *pkg_info = NULL;
-	list_type_default_s *default_info = NULL;
+	int ret = CONTEXT_HISTORY_ERROR_NONE;
+	int rec_size = 0;
+	int last_launch_time;
+	char *context_app_id;
+	Eina_List *l;
+	list_type_default_s *pkg_info = NULL;
 
-	pkg_info = eina_hash_find(private_table_s.pkginfo_table, appid);
-	if (!pkg_info) {
-		_D("app(%s) is not taskmanage app", appid);
-		return NULL;
+	context_history_h history_handle;
+	context_history_list_h history_app_list;
+	context_history_record_h history_record;
+
+	ret = context_history_create(&history_handle);
+	retv_if(ret != CONTEXT_HISTORY_ERROR_NONE, TASK_MGR_ERROR_FAIL);
+
+	ret = context_history_get_list(history_handle,
+			CONTEXT_HISTORY_RECENTLY_USED_APP, NULL, &history_app_list);
+	retv_if(ret != CONTEXT_HISTORY_ERROR_NONE, TASK_MGR_ERROR_FAIL);
+
+	ret = context_history_list_get_count(history_app_list, &rec_size);
+	retv_if(ret != CONTEXT_HISTORY_ERROR_NONE, TASK_MGR_ERROR_FAIL);
+
+	_D("Num of records: %d", rec_size);
+
+	int i;
+	for (i = 0; i < rec_size; ++i) {
+		context_history_list_get_current(history_app_list, &history_record);
+		context_history_record_get_int(history_record, CONTEXT_HISTORY_LAST_TIME, &last_launch_time);
+		context_history_record_get_string(history_record, CONTEXT_HISTORY_APP_ID, &context_app_id);
+
+		EINA_LIST_FOREACH(pkg_list, l, pkg_info) {
+			if(!strcmp(pkg_info->appid, context_app_id))
+			{
+				pkg_info->launch_time = last_launch_time;
+			}
+		}
+
+		free(context_app_id);
+
+		context_history_record_destroy(history_record);
+		context_history_list_move_next(history_app_list);
 	}
 
-	if (!pkg_info->taskmanage) {
-		_D("app(%s) is not taskmanage app", appid);
-		return NULL;
-	}
-
-	default_info = calloc(1, sizeof(*default_info));
-	retv_if(!default_info, NULL);
-
-	default_info->taskmanage = pkg_info->taskmanage;
-	default_info->launch_time = launch_time;
-	default_info->nodisplay = pkg_info->nodisplay;
-
-	default_info->appid = strdup(appid);
-	goto_if(!default_info->appid, ERROR);
-
-	if (arg) {
-		default_info->arg = strdup(arg);
-		goto_if(!default_info->arg, ERROR);
-	}
-
-	if (pkg_info->pkgid) {
-		default_info->pkgid = strdup(pkg_info->pkgid);
-		goto_if(!default_info->pkgid, ERROR);
-	} else {
-		_E("Fail to get pkgid from pkg info table");
-		goto ERROR;
-	}
-
-	if (pkg_info->icon) {
-		default_info->icon = strdup(pkg_info->icon);
-		goto_if(!default_info->icon, ERROR);
-	} else {
-		_E("Fail to get icon from pkg info table");
-		goto ERROR;
-	}
-
-	if (pkg_info->name) {
-		default_info->name = strdup(pkg_info->name);
-		goto_if(!default_info->name, ERROR);
-	} else {
-		_E("Fail to get name from pkg info table");
-		goto ERROR;
-	}
-
-	_D("list add id : [%s], icon : [%s], name : [%s]", pkg_info->pkgid, pkg_info->icon, pkg_info->name);
-
-	return default_info;
-
-ERROR:
-
-	_pkglist_unretrieve_item(default_info);
-	return NULL;
-}
-
-
-
-#define DEFAULT_ICON IMAGEDIR"/default.png"
-int _get_pkginfo_cb(pkgmgrinfo_appinfo_h app_handle, void *user_data)
-{
-	char *appid = NULL;
-	char *pkgid = NULL;
-	char *name = NULL;
-	char *icon = NULL;
-	private_pkginfo_s *pkg_info = NULL;
-
-	pkg_info = calloc(1, sizeof(*pkg_info));
-	retv_if(!pkg_info, PMINFO_R_ERROR);
-
-	memset(pkg_info, 0, sizeof(private_pkginfo_s));
-
-	pkgmgrinfo_appinfo_get_appid(app_handle, &appid);
-	goto_if(!appid, ERROR);
-
-	pkg_info->appid = strdup(appid);
-	goto_if(!pkg_info->appid, ERROR);
-
-	if (PMINFO_R_OK != pkgmgrinfo_appinfo_is_taskmanage(app_handle, &pkg_info->taskmanage)) {
-		goto ERROR;
-	}
-
-	if (PMINFO_R_OK != pkgmgrinfo_appinfo_get_pkgid(app_handle, &pkgid)) {
-		goto ERROR;
-	}
-	pkg_info->pkgid = strdup(pkgid);
-	goto_if(!pkg_info->pkgid, ERROR);
-
-	if (PMINFO_R_OK != pkgmgrinfo_appinfo_get_icon(app_handle, &icon)) {
-		goto ERROR;
-	}
-	if (icon && 0 == access(icon, F_OK)) {
-		pkg_info->icon= strdup(icon);
-	} else {
-		_D("Fail to access icon path");
-		pkg_info->icon = strdup(DEFAULT_ICON);
-	}
-	goto_if(!pkg_info->icon, ERROR);
-
-	if (PMINFO_R_OK != pkgmgrinfo_appinfo_get_label(app_handle, &name)) {
-		goto ERROR;
-	}
-	if (name) {
-		pkg_info->name= strdup(name);
-		goto_if(!pkg_info->name, ERROR);
-	}
-
-	if (PMINFO_R_OK != pkgmgrinfo_appinfo_is_nodisplay(app_handle, &pkg_info->nodisplay)) {
-		goto ERROR;
-	}
-
-	eina_hash_add(private_table_s.pkginfo_table, pkg_info->appid, pkg_info);
-
-	return PMINFO_R_OK;
-
-ERROR:
-	if (pkg_info->name) free(pkg_info->name);
-	if (pkg_info->icon) free(pkg_info->icon);
-	if (pkg_info->pkgid) free(pkg_info->pkgid);
-	if (pkg_info->appid) free(pkg_info->appid);
-	free(pkg_info);
-
-	return PMINFO_R_ERROR;
-}
-
-
-
-static task_mgr_error_e _create_pkginfo_table(void)
-{
-	_D("");
-	pkgmgrinfo_appinfo_filter_h handle;
-
-	int ret = 0;
-
-	private_table_s.pkginfo_table = eina_hash_string_superfast_new(NULL);
-
-	ret = pkgmgrinfo_appinfo_filter_create(&handle);
-	if (PMINFO_R_OK != ret) {
-		return TASK_MGR_ERROR_FAIL;
-	}
-
-	ret = pkgmgrinfo_appinfo_filter_add_bool(handle, PMINFO_APPINFO_PROP_APP_TASKMANAGE, 1);
-	if (PMINFO_R_OK != ret) {
-		pkgmgrinfo_appinfo_filter_destroy(handle);
-		return TASK_MGR_ERROR_FAIL;
-	}
-
-	ret = pkgmgrinfo_appinfo_usr_filter_foreach_appinfo(handle, _get_pkginfo_cb, NULL, getuid());
-	if (ret != PMINFO_R_OK) {
-		pkgmgrinfo_appinfo_filter_destroy(handle);
-		return TASK_MGR_ERROR_FAIL;
-	}
-
-	pkgmgrinfo_appinfo_filter_destroy(handle);
+	context_history_list_destroy(history_app_list);
+	context_history_destroy(history_handle);
 
 	return TASK_MGR_ERROR_NONE;
 }
 
+static bool _get_pkginfo_cb(app_info_h app_handle, void *user_data)
+{
+	_D("");
 
+	char *appid = NULL;
+	char *pkgid = NULL;
+	char *name = NULL;
+	char *icon = NULL;
+	bool is_running = false;
+	bool nodisplay = false;
+
+	Eina_List **pkg_list = (Eina_List **) user_data;
+	list_type_default_s *default_pkg_info = NULL;
+
+	if (app_info_get_app_id(app_handle, &appid) != APP_MANAGER_ERROR_NONE
+			|| !appid)
+		goto ERROR;
+
+	if (app_manager_is_running(appid, &is_running) != APP_MANAGER_ERROR_NONE
+			|| !is_running) {
+
+		_D("Application %s is not running", appid);
+		free(appid);
+
+		return GO_NEXT;
+	}
+
+	if (app_info_get_package(app_handle, &pkgid) != APP_MANAGER_ERROR_NONE
+			|| !pkgid)
+		goto ERROR;
+
+	if (app_info_get_label(app_handle, &name) != APP_MANAGER_ERROR_NONE
+			|| !name)
+		goto ERROR;
+
+	if (app_info_is_nodisplay(app_handle, &nodisplay) != APP_MANAGER_ERROR_NONE)
+		goto ERROR;
+
+	if (app_info_get_icon(app_handle, &icon) != APP_MANAGER_ERROR_NONE || !icon)
+		goto ERROR;
+
+	default_pkg_info = calloc(1, sizeof(list_type_default_s));
+	retv_if(!default_pkg_info, BREAK);
+
+	default_pkg_info->appid = appid;
+	default_pkg_info->pkgid = pkgid;
+	default_pkg_info->name = name;
+	default_pkg_info->nodisplay = nodisplay;
+
+	if (0 == access(icon, F_OK)) {
+		default_pkg_info->icon = icon;
+	} else {
+		_D("Fail to access icon path");
+		default_pkg_info->icon = strdup(DEFAULT_ICON);
+	}
+
+	_D("AppID: %s", default_pkg_info->appid);
+	_D("PkgID: %s", default_pkg_info->pkgid);
+	_D("Icon: %s", default_pkg_info->icon);
+	_D("Label: %s", default_pkg_info->name);
+
+	*pkg_list = eina_list_append(*pkg_list, default_pkg_info);
+
+	return GO_NEXT;
+
+ERROR:
+	_E("Cannot get pkg info");
+	if (name)
+		free(name);
+	if (icon)
+		free(icon);
+	if (pkgid)
+		free(pkgid);
+	if (appid)
+		free(appid);
+	if (default_pkg_info)
+		free(default_pkg_info);
+
+	return BREAK;
+}
 
 static Eina_Bool _remove_pkginfo(const Eina_Hash *hash, const void *key, void *data, void *fdata)
 {
@@ -267,8 +230,6 @@ static Eina_Bool _remove_pkginfo(const Eina_Hash *hash, const void *key, void *d
 	return EINA_TRUE;
 }
 
-
-
 static void _destroy_pkginfo_table(void)
 {
 	_D("");
@@ -277,8 +238,6 @@ static void _destroy_pkginfo_table(void)
 	eina_hash_free(private_table_s.pkginfo_table);
 	private_table_s.pkginfo_table = NULL;
 }
-
-
 
 static int _launch_time_sort_cb(const void *d1, const void *d2)
 {
@@ -294,66 +253,55 @@ static int _launch_time_sort_cb(const void *d1, const void *d2)
 	return tmp1->launch_time >= tmp2->launch_time ? -1 : 1;
 }
 
-
-
-extern task_mgr_error_e list_sort(Eina_List *list, int (*_sort_cb)(const void *d1, const void *d2))
-{
-	retv_if(!list, TASK_MGR_ERROR_INVALID_PARAMETER);
-
-	list = eina_list_sort(list, eina_list_count(list), _sort_cb);
-	retv_if(!list, TASK_MGR_ERROR_FAIL);
-
-	return TASK_MGR_ERROR_NONE;
-}
-
-
-
-extern task_mgr_error_e list_create(Eina_List **pkg_list)
+static task_mgr_error_e _get_running_apps(Eina_List **pkg_list)
 {
 	_D("");
 
-	rua_init();
-	char **table = NULL;
-	list_type_default_s *default_info = NULL;
+	app_info_filter_h handle;
+	int ret = 0;
 
-	int nrows = 0, ncols = 0;
-	int row = 0;
-
-	retv_if (TASK_MGR_ERROR_NONE != _create_pkginfo_table(), TASK_MGR_ERROR_FAIL);
-
-	if (-1 == rua_history_load_db(&table, &nrows, &ncols)) {
-		if (table) {
-			rua_history_unload_db(&table);
-		}
+	ret = app_info_filter_create(&handle);
+	if (ret != APP_MANAGER_ERROR_NONE)
 		return TASK_MGR_ERROR_FAIL;
-	}
 
-	_D("Apps in rua history is %d", nrows);
+	ret = app_info_filter_add_bool(handle, PACKAGE_INFO_PROP_APP_TASKMANAGE, 1);
+	if (ret != APP_MANAGER_ERROR_NONE)
+		return TASK_MGR_ERROR_FAIL;
 
-	for (; row < nrows; row++) {
-		struct rua_rec rec_result = {0, };
-		rua_history_get_rec(&rec_result, table, nrows, ncols, row);
-		default_info = _pkglist_retrieve_item(rec_result.pkg_name, rec_result.arg, rec_result.launch_time);
-		if (default_info) {
-			*pkg_list = eina_list_append(*pkg_list, default_info);
-		}
-	}
+	ret = app_info_filter_foreach_appinfo(handle, _get_pkginfo_cb, pkg_list);
+	if (ret != APP_MANAGER_ERROR_NONE)
+		return TASK_MGR_ERROR_FAIL;
 
-	if (*pkg_list && TASK_MGR_ERROR_NONE != list_sort(*pkg_list, _launch_time_sort_cb)) {
-		_E("Cannot sort pkg_list");
-	}
-
-	if (!eina_list_count(*pkg_list)) {
-		_D("list is empty.");
-		_pkglist_unretrieve_item(default_info);
-		return TASK_MGR_ERROR_NO_DATA;
-
-	}
+	app_info_filter_destroy(handle);
 
 	return TASK_MGR_ERROR_NONE;
 }
 
+ Eina_List *list_sort(Eina_List *list, int (*_sort_cb)(const void *d1, const void *d2))
+ {
+	retv_if(!list, NULL);
 
+	list = eina_list_sort(list, eina_list_count(list), _sort_cb);
+	retv_if(!list, NULL);
+
+	return list;
+}
+
+extern task_mgr_error_e list_create(Eina_List **pkg_list)
+{
+	int ret = TASK_MGR_ERROR_NONE;
+
+	ret = _get_running_apps(pkg_list);
+	retv_if(ret != TASK_MGR_ERROR_NONE, TASK_MGR_ERROR_FAIL);
+
+	ret = _get_app_launchtime(*pkg_list);
+	retv_if(ret != TASK_MGR_ERROR_NONE, TASK_MGR_ERROR_FAIL);
+
+	*pkg_list = list_sort(*pkg_list, _launch_time_sort_cb);
+	retv_if(!*pkg_list, TASK_MGR_ERROR_FAIL);
+
+	return TASK_MGR_ERROR_NONE;
+}
 
 extern void list_destroy(Eina_List *pkg_list)
 {
@@ -375,5 +323,4 @@ extern void list_destroy(Eina_List *pkg_list)
 	}
 
 	pkg_list = NULL;
-	rua_fini();
 }

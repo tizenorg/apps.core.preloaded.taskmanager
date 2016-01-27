@@ -20,7 +20,6 @@
 #include <Elementary.h>
 #include <app_manager.h>
 #include <stdbool.h>
-#include <rua.h>
 
 #include "conf.h"
 #include "item.h"
@@ -695,10 +694,6 @@ extern void item_terminate(Evas_Object *item)
 	_D("Terminate: %s(%d)", appid, running);
 	if (running) {
 		util_kill_app(appid);
-	}
-
-	if (0 != rua_delete_history_with_pkgname(appid)) {		
-		_E("Cannot delete history for package(%s)", appid);		
 	}
 }
 

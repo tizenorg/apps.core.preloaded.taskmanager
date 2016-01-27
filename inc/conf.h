@@ -42,9 +42,11 @@
 #define BG_COLOR (255*0.5)
 
 //edc
+#define EDJEDIR "/home/owner/apps_rw/org.tizen.task-mgr/res/edje"
 #define LAYOUT EDJEDIR"/layout.edj"
 #define BOX_LAYOUT EDJEDIR"/box.edj"
 #define ITEM_LAYOUT EDJEDIR"/item.edj"
+#define DEFAULT_ICON "/home/owner/apps_rw/org.tizen.task-mgr/res/images/default.png"
 
 #define BOX_GROUP_NAME "box"
 
