@@ -19,7 +19,7 @@
 
 #include <Elementary.h>
 #include <app_manager.h>
-//#include <app_manager_extension.h>
+#include <app_manager_extension.h>
 #include <app_control.h>
 #include <stdbool.h>
 
