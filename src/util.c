@@ -18,7 +18,6 @@
  */
 #include <Elementary.h>
 #include <app_manager.h>
-#include <app_manager_extension.h>
 #include <app_control.h>
 #include <app_common.h>
 #include <stdbool.h>
@@ -41,7 +40,7 @@ Eina_Bool util_kill_app(const char *appid)
 		return EINA_FALSE;
 	}
 
-	ret = app_manager_terminate_app(context);
+	ret = app_manager_request_terminate_bg_app(context);
 	app_context_destroy(context);
 
 	if (ret != APP_MANAGER_ERROR_NONE) {
