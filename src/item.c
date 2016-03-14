@@ -86,8 +86,6 @@ static void _clear_all_clicked_cb(void *data, Evas_Object *obj, const char *emis
 	scroller_pop_all_item(scroller, 1);
 }
 
-
-
 Evas_Object *item_clear_all_create(Evas_Object *scroller)
 {
 	retv_if(!scroller, NULL);
