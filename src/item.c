@@ -62,8 +62,6 @@ list_type_default_s *item_get_info(Evas_Object *item)
 	return info;
 }
 
-
-
 void item_clear_set_disable(Evas_Object *scroller)
 {
 	Evas_Object *clear_item = NULL;
@@ -76,8 +74,6 @@ void item_clear_set_disable(Evas_Object *scroller)
 
 }
 
-
-
 static void _clear_all_clicked_cb(void *data, Evas_Object *obj, const char *emission, const char *source)
 {
 	Evas_Object *scroller = data;
@@ -85,8 +81,6 @@ static void _clear_all_clicked_cb(void *data, Evas_Object *obj, const char *emis
 	_D("");
 	scroller_pop_all_item(scroller, 1);
 }
-
-
 
 Evas_Object *item_clear_all_create(Evas_Object *scroller)
 {

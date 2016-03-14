@@ -49,7 +49,7 @@ Taskmanager application reference implementation.
 %define _sys_license_dir %{TZ_SYS_SHARE}/license
 
 export CFLAGS="${CFLAGS} -Wall"
-export LDFLAGS="${LDFLAGS} -Wl,--hash-style=both -Wl,--as-needed -fPIE"
+export LDFLAGS="${LDFLAGS} -Wl,--hash-style=both -Wl,--as-needed -pie"
 cd CMake
 cmake . -DINSTALL_PREFIX=%{_pkg_dir} \
 	-DSYS_ICONS_DIR=%{_sys_icons_dir} \
