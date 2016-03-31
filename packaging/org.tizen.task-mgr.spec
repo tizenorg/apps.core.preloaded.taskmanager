@@ -1,5 +1,5 @@
 Name:       org.tizen.task-mgr
-#VCS_FROM:   apps/core/preloaded/taskmanager#9a96a273bc319e12a0d2d2466d2fd3e32af1f934
+#VCS_FROM:   apps/core/preloaded/taskmanager#56d1dad96328880ddede283bf273e110f3ebf5e9
 #RS_Ver:    20160331_3
 Summary:    App in rpm
 Version:    1.0.0
