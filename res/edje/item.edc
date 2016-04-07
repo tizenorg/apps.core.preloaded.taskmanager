@@ -17,7 +17,7 @@
  *
  */
 
- #include "conf.h"
+ #include "conf.edc"
 
 
 
@@ -137,7 +137,8 @@ collections {
 					text {
 						text: "";
 						style: "item_style";
-						min: 0 0;
+						min: 1 0;
+						ellipsis: -1;
 					}
 					align: 0.0 0.5;
 					visible: 1;
@@ -245,6 +246,7 @@ collections {
 						text: "Clear all";
 						style: "item_style";
 						min: 1 0;
+						ellipsis: -1;
 					}
 					align: 0.0 0.5;
 					visible: 1;

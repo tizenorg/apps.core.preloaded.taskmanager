@@ -17,82 +17,68 @@
  *
  */
 
- #include "conf.edc"
 
-styles {
-	style {
-		name: "no_item_style";
-		base: "font=Tizen:style=Bold font_size=32 color=#ffffff align=center style=shadow shadow_color=#000000bf wrap=mixed";
-		tag:  "br" "\n";
-		tag:  "hilight" "+ font_weight=Bold";
-		tag:  "b" "+ font_weight=Bold";
-		tag:  "tab" "\t";
-	}
-}
+
+#include "conf.edc"
 
 collections {
-	base_scale: 2.6;
+	base_scale: 2.1;
 	group {
-		name: "layout";
+		name: "box";
 		parts {
 			part {
 				name: "bg";
-				type: SWALLOW;
+				type: RECT;
 				scale: 1;
 				description {
 					state: "default" 0.0;
 					rel1 { relative: 0.0 0.0; }
 					rel2 { relative: 1.0 1.0; }
+					min: BASE_WIDTH BASE_HEIGHT;
+					color: 0 0 0 0;
 					visible: 1;
 				}
 			}
 			part {
-				name: "scroller";
+				name: "box";
 				type: SWALLOW;
-				scale: 1;
 				description {
 					state: "default" 0.0;
-					rel1 { relative: 0.0 0.0; to: "bg"; }
-					rel2 { relative: 1.0 1.0; to: "bg"; }
+					rel1 { relative: 0.0 1.0; }
+					rel2 { relative: 1.0 1.0; }
 					align: 0.5 1.0;
+					fixed: 0 1;
 					visible: 1;
 				}
-			}
-			part {
-				name: "no,apps,txt";
-				type: TEXTBLOCK;
-				scale: 1;
 				description {
-					state: "default" 0.0;
-					color: 255 255 255 255;
-					rel1 { relative: 0.15 0.4; to: "bg"; }
-					rel2 { relative: 0.85 0.5; to: "bg"; }
-					text {
-						text: " ";
-						style: "no_item_style";
-						align: 0.5 0.5;
-					}
-					visible: 0;
-				}
-				description {
-					state: "show" 0.0;
-					inherit: "default" 0.0;
+					state: "hidden" 1.0;
+					rel1 { relative: 0.0 1.0; }
+					rel2 { relative: 1.0 2.0; }
+					align: 0.5 1.0;
+					fixed: 0 1;
 					visible: 1;
 				}
 			}
 		} //parts
 		programs {
 			program {
-				signal: "no,apps,txt,show";
-				source: "no,apps,txt";
-				action: STATE_SET "show" 0.0;
-				target: "no,apps,txt";
+				signal: "all,apps,hide";
+				source: "task-mgr";
+				action: STATE_SET "hidden" 1.0;
+				target: "box";
+				transition: DECEL 0.5;
+				after: "all,apps,hidden,emit";
 			}
 			program {
-				signal: "no,apps,txt,hide";
-				source: "no,apps,txt";
+				signal: "all,apps,show";
+				source: "task-mgr";
 				action: STATE_SET "default" 0.0;
-				target: "no,apps,txt";
+				target: "box";
+				transition: DECEL 0.5;
+			}
+			program {
+				name: "all,apps,hidden,emit";
+				action: SIGNAL_EMIT "all,apps,hidden" "box";
 			}
 		}
 	} //group

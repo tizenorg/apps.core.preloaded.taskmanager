@@ -20,7 +20,6 @@
 #include <Elementary.h>
 #include <app_manager.h>
 #include <stdbool.h>
-#include <rua.h>
 
 #include "conf.h"
 #include "item.h"
@@ -52,7 +51,7 @@
 
 
 
-extern list_type_default_s *item_get_info(Evas_Object *item)
+list_type_default_s *item_get_info(Evas_Object *item)
 {
 	retv_if(!item, NULL);
 	list_type_default_s *info = NULL;
@@ -64,7 +63,7 @@ extern list_type_default_s *item_get_info(Evas_Object *item)
 
 
 
-extern void item_clear_set_disable(Evas_Object *scroller)
+void item_clear_set_disable(Evas_Object *scroller)
 {
 	Evas_Object *clear_item = NULL;
 	ret_if(!scroller);
@@ -88,7 +87,7 @@ static void _clear_all_clicked_cb(void *data, Evas_Object *obj, const char *emis
 
 
 
-extern Evas_Object *item_clear_all_create(Evas_Object *scroller)
+Evas_Object *item_clear_all_create(Evas_Object *scroller)
 {
 	retv_if(!scroller, NULL);
 
@@ -97,7 +96,7 @@ extern Evas_Object *item_clear_all_create(Evas_Object *scroller)
 	clear_item = elm_layout_add(scroller);
 	retv_if(!clear_item, NULL);
 
-	if (!elm_layout_file_set(clear_item, ITEM_LAYOUT, "clear_item")) {
+	if (!elm_layout_file_set(clear_item, util_get_file_path(APP_DIR_RESOURCE, ITEM_LAYOUT_EDJ), "clear_item")) {
 		_E("Failed to set the layout");
 		evas_object_del(clear_item);
 		return NULL;
@@ -117,7 +116,7 @@ extern Evas_Object *item_clear_all_create(Evas_Object *scroller)
 
 
 
-extern void item_clear_all_destroy(Evas_Object *scroller)
+void item_clear_all_destroy(Evas_Object *scroller)
 {
 	ret_if(!scroller);
 
@@ -593,7 +592,7 @@ static void _clicked_cb(void *data, Evas_Object *obj, const char *emission, cons
 
 
 
-extern Evas_Object *item_create(Evas_Object *scroller, list_type_default_s *info)
+Evas_Object *item_create(Evas_Object *scroller, list_type_default_s *info)
 {
 	retv_if(NULL == scroller, NULL);
 	retv_if(NULL == info, NULL);
@@ -604,13 +603,13 @@ extern Evas_Object *item_create(Evas_Object *scroller, list_type_default_s *info
 
 	item = elm_layout_add(scroller);
 	retv_if(NULL == item, NULL);
-	elm_layout_file_set(item, ITEM_LAYOUT, "item");
+	elm_layout_file_set(item, util_get_file_path(APP_DIR_RESOURCE, ITEM_LAYOUT_EDJ), "item");
 	evas_object_size_hint_weight_set(item, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
 	evas_object_show(item);
 
 	item_inner = elm_layout_add(scroller);
 	goto_if(NULL == item_inner, ERROR);
-	elm_layout_file_set(item_inner, ITEM_LAYOUT, "item_inner");
+	elm_layout_file_set(item_inner, util_get_file_path(APP_DIR_RESOURCE, ITEM_LAYOUT_EDJ), "item_inner");
 	evas_object_size_hint_weight_set(item_inner, EVAS_HINT_EXPAND, EVAS_HINT_EXPAND);
 	evas_object_show(item_inner);
 	elm_object_part_content_set(item, "inner", item_inner);
@@ -639,7 +638,7 @@ ERROR:
 
 
 
-extern void item_destroy(Evas_Object *item)
+void item_destroy(Evas_Object *item)
 {
 	ret_if(!item);
 
@@ -668,7 +667,7 @@ extern void item_destroy(Evas_Object *item)
 
 
 
-extern void item_terminate(Evas_Object *item)
+void item_terminate(Evas_Object *item)
 {
 	char *appid = NULL;
 	int ret;
@@ -685,10 +684,6 @@ extern void item_terminate(Evas_Object *item)
 	_D("Terminate: %s(%d)", appid, running);
 	if (running) {
 		util_kill_app(appid);
-	}
-
-	if (0 != rua_delete_history_with_pkgname(appid)) {
-		_E("Cannot delete history for package(%s)", appid);
 	}
 }
 
