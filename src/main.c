@@ -30,6 +30,7 @@
 #include "util.h"
 
 #define KEY_BACK "XF86Back"
+#define KEY_HOME "XF86Home"
 #define PRIVATE_DATA_KEY_LIST_TIMER "pri_list_tm"
 
 static main_s main_info = {
@@ -56,10 +57,10 @@ main_h main_get_info(void)
 
 static Eina_Bool _back_key_pressed(void *data, Evas_Object *obj, Evas_Object *src, Evas_Callback_Type type, void *event_info)
 {
-	_D("");
 	Evas_Event_Key_Down *ev = event_info;
 
-	if (type == EVAS_CALLBACK_KEY_DOWN && strncmp(KEY_BACK, ev->key, strlen(KEY_BACK)) == 0) {
+	if (type == EVAS_CALLBACK_KEY_DOWN && ((strncmp(KEY_BACK, ev->key, strlen(KEY_BACK)) == 0) ||
+			(strncmp(KEY_HOME, ev->key, strlen(KEY_HOME)) == 0))) {
 		_D("KEY PRESSED: %s", ev->key);
 
 		elm_exit();
